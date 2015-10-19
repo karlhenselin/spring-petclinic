@@ -1,0 +1,60 @@
+@echo off
+
+set INITIAL_DIR=%CD%
+
+call agent\bin\fdutils.bat
+
+rem need to make sure that we get the INSTALL_DIR and AGENT_NAME to setup the scripts, changing the order can break the logic
+call agent\bin\fdutils.bat :getInput "Enter FlexDeploy install directory"
+set INSTALL_DIR=%RESPONSE%
+
+call agent\bin\fdutils.bat :createDirectory %INSTALL_DIR%
+
+rem create the constants based on the INSTALL_DIR and AGENT_NAME variables
+rem this is a reload of the script, needs to be in both spots)
+
+set LCL_AGENT=%INITIAL_DIR%\agent
+set LCL_LIB=%INITIAL_DIR%\lib
+set LCL_BIN_DIR=%LCL_AGENT%\bin
+set LCL_LOG_DIR=%LCL_AGENT%\logs
+
+set INSTALL_AGENT_DIR=%INSTALL_DIR%\agent
+set INSTALL_BIN=%INSTALL_AGENT_DIR%\bin
+set INSTALL_LOGS=%INSTALL_AGENT_DIR%\logs
+set INSTALL_WORKING=%INSTALL_AGENT_DIR%\working
+set INSTALL_LIB=%INSTALL_DIR%\lib
+
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib INSTALL_AGENT_DIR %INSTALL_AGENT_DIR% %LCL_BIN_DIR%
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib INSTALL_BIN %INSTALL_BIN% %LCL_BIN_DIR%
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib INSTALL_DIR %INSTALL_DIR% %LCL_BIN_DIR%
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib INSTALL_LOGS %INSTALL_LOGS% %LCL_BIN_DIR%
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib INSTALL_WORKING %INSTALL_WORKING% %LCL_BIN_DIR%
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib INSTALL_LIB %INSTALL_LIB% %LCL_BIN_DIR%
+ 
+rem need to have the file system structure in place before adding to lib
+rem ########call %INSTALL_BIN%\fdutils.bat :addVariableToLib INSTALL_DIR %INSTALL_DIR%
+
+call %LCL_BIN_DIR%\fdutils.bat :getInput "Enter Agent Host" "localhost"
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib AGENT_HOST %RESPONSE% %LCL_BIN_DIR%
+
+call %LCL_BIN_DIR%\fdutils.bat :getInput "Enter Agent Port" "8886"
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib AGENT_PORT %RESPONSE% %LCL_BIN_DIR%
+
+call %LCL_BIN_DIR%\fdutils.bat :getInput "Enter Server Host" "localhost"
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib SERVER_HOST %RESPONSE% %LCL_BIN_DIR%
+
+call %LCL_BIN_DIR%\fdutils.bat :getInput "Enter Server Port" "5400"
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib SERVER_PORT %RESPONSE% %LCL_BIN_DIR%
+
+call %LCL_BIN_DIR%\fdutils.bat :getInput "Enter Java Home" "\Progra~1\Java\jdk1.6.0_45"
+call %LCL_BIN_DIR%\fdutils.bat :addVariableToLib JAVA_HOME %RESPONSE% %LCL_BIN_DIR%
+
+rem save some extra variables in the lib
+call %LCL_BIN_DIR%\fdutils :addVariableToLib PID_FILE current_pid.txt %LCL_BIN_DIR%
+
+rem copy files to install directory
+xcopy /E /I /Q %INITIAL_DIR%\agent\bin\* %INSTALL_DIR%\bin
+xcopy /E /I /Q %INITIAL_DIR%\lib\* %INSTALL_DIR%\lib
+call %LCL_BIN_DIR%\fdutils.bat :createDirectory %INSTALL_DIR%\logs
+call %LCL_BIN_DIR%\fdutils.bat :createDirectory %INSTALL_DIR%\plugins
+call %LCL_BIN_DIR%\fdutils.bat :createDirectory %INSTALL_DIR%\working
